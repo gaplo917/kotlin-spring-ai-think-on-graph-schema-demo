@@ -1,0 +1,26 @@
+version: '3'
+services:
+  neo4j:
+    image: neo4j:latest
+    volumes:
+      - ./docker-cache/neo4j/logs:/logs
+      - ./docker-cache/neo4j/config:/config
+      - ./docker-cache/neo4j/data:/data
+      - ./docker-cache/neo4j/plugins:/plugins
+    environment:
+      - NEO4J_AUTH=neo4j/local_database_only
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+  neo4j-movie:
+    image: neo4j:latest
+    volumes:
+      - ./docker-cache/neo4j-movie/logs:/logs
+      - ./docker-cache/neo4j-movie/config:/config
+      - ./docker-cache/neo4j-movie/data:/data
+      - ./docker-cache/neo4j-movie/plugins:/plugins
+    environment:
+      - NEO4J_AUTH=neo4j/local_database_only
+    ports:
+      - "8474:7474"
+      - "8687:7687"

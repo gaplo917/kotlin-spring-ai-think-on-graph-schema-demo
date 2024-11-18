@@ -1,0 +1,99 @@
+
+### POST
+# @timeout 600
+POST http://localhost:8080/chat
+Content-Type: application/json
+
+{
+  "prompt": "hi"
+}
+###
+
+### POST
+# @timeout 600
+POST http://localhost:8080/chat
+Content-Type: application/json
+
+{
+  "prompt": "tell me a joke"
+}
+###
+
+
+### POST
+# @timeout 600
+POST http://localhost:8080/chat
+Content-Type: application/json
+
+{
+  "prompt": "predict next week weather in list"
+}
+
+###
+
+### POST
+# @timeout 600
+POST http://localhost:8080/chat
+Content-Type: application/json
+
+{
+  "prompt": "weather?"
+}
+
+### POST
+# @timeout 600
+POST http://localhost:8080/chat
+Content-Type: application/json
+
+{
+  "prompt": "predict next week weather and describe what is a joke"
+}
+
+
+### POST
+# @timeout 600
+POST http://localhost:8080/chat
+Content-Type: application/json
+
+{
+  "prompt": "list US president"
+}
+
+
+### POST
+# @timeout 600
+POST http://localhost:8080/chat
+Content-Type: application/json
+
+{
+  "prompt": "what is my portfolio?"
+}
+
+### POST
+# @timeout 600
+POST http://localhost:8080/chat
+Content-Type: application/json
+
+{
+  "prompt": "what is my portfolio and list my holding with quantity"
+}
+
+
+### POST
+# @timeout 600
+POST http://localhost:8080/chat
+Content-Type: application/json
+
+{
+  "prompt": "list my ticket"
+}
+
+
+
+### Chat Memory Demo
+GET http://localhost:8080/ai/chatWithMemory
+Content-Type: application/json
+
+{
+  "prompt": "hi"
+}

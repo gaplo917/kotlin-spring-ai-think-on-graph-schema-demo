@@ -1,0 +1,116 @@
+**Nodes:**
+```mermaid
+classDiagram
+class User {
+    +String userId
+    +String email
+    +String phoneNumber
+    +DateTime registrationDate
+    +String kycStatus
+    +DateTime lastLoginDate
+    +String accountStatus
+    +Float riskScore
+}
+class Campaign {
+    +String campaignId
+    +String name
+    +DateTime startDate
+    +DateTime endDate
+    +String channel
+    +String targetAudience
+}
+class Portfolio {
+    +String portfolioId
+    +Float totalValue
+    +DateTime lastUpdateTime
+}
+class Asset {
+    +String assetId
+    +String symbol
+    +String type
+    +String name
+    +Integer decimals
+}
+class Order {
+    +String orderId
+    +String type
+    +String side
+    +String symbol
+    +Float price
+    +Float quantity
+    +String status
+    +DateTime createTime
+    +DateTime updateTime
+}
+class CCDeposit {
+    +String depositId
+    +Float amount
+    +Float usdAmount
+    +String symbol
+    +String status
+    +DateTime timestamp
+}
+class OCDeposit {
+    +String depositId
+    +Float amount
+    +String symbol
+    +String status
+    +DateTime timestamp
+}
+class Withdrawal {
+    +String withdrawalId
+    +String symbol
+    +String status
+    +String txHash
+    +String blockchain
+    +Integer blockNumber
+    +Float amount
+    +DateTime timestamp
+    +Float txnFee
+}
+class WalletAddr {
+    +String address
+    +String blockchain
+    +String label
+    +DateTime creationDate
+}
+class CSTicket {
+    +String ticketId
+    +String subject
+    +String priority
+    +String status
+    +DateTime createTime
+    +DateTime resolveTime
+}
+class CSAgent {
+    +String agentId
+    +String name
+    +String department
+}
+```
+**Relationships:**
+```mermaid
+classDiagram
+User -- Campaign : ACQUIRED_FROM_CAMPAIGN
+User -- Campaign : JOIN_CAMPAIGN
+User -- Portfolio : OWNS_PORTFOLIO
+Portfolio -- Asset : CONTAINS_ASSET
+User -- Order : PLACED_ORDER
+Order -- Asset : TRADES_ASSET
+User -- CCDeposit : MADE_DEPOSIT
+User -- OCDeposit : MADE_DEPOSIT
+Campaign -- CCDeposit : LEAD_DEPOSIT
+CCDeposit -- Asset : INVOLVES_ASSET
+OCDeposit -- Asset : INVOLVES_ASSET
+User -- Withdrawal : REQUESTED_WITHDRAWAL
+Withdrawal -- Asset : INVOLVES_ASSET
+Withdrawal -- WalletAddr : TO_ADDRESS
+User -- CSTicket : CREATED_TICKET
+CSTicket -- CSAgent : HANDLED_BY_AGENT
+CSTicket -- Withdrawal : RELATES_TO
+OCDeposit -- WalletAddr : DEPOSIT_FROM_ADDRESS
+WalletAddr -- WalletAddr : ONCHAIN_TRANSFER_TO
+```
+**Relationship Properties:**
+- CONTAINS_ASSET: {quantity, averageBuyPrice, usdPrice, lastUpdateTime}
+- ONCHAIN_TRANSFER_TO: {blockNumber, txHash, blockchain, amount, timestamp, txnFee}
