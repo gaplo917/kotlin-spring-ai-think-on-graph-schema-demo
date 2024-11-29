@@ -1,5 +1,5 @@
 
-### POST
+### POST Ask price demo step 1
 # @timeout 600
 POST http://localhost:8080/chatWithMemory
 Content-Type: application/json
@@ -10,7 +10,7 @@ Content-Type: application/json
 
 ###
 
-### POST
+### POST Ask price demo step 2
 # @timeout 600
 POST http://localhost:8080/chatWithMemory
 Content-Type: application/json
@@ -19,7 +19,7 @@ Content-Type: application/json
   "prompt": "btc and eth"
 }
 
-### POST
+### POST Ask price demo step 3
 # @timeout 600
 POST http://localhost:8080/chatWithMemory
 Content-Type: application/json
@@ -28,7 +28,7 @@ Content-Type: application/json
   "prompt": "more other coins"
 }
 
-### POST
+### POST Ask price demo step 4
 # @timeout 600
 POST http://localhost:8080/chatWithMemory
 Content-Type: application/json
@@ -37,7 +37,7 @@ Content-Type: application/json
   "prompt": "solana"
 }
 
-### POST
+### POST Ask portfolio demo
 # @timeout 600
 POST http://localhost:8080/chat
 Content-Type: application/json
@@ -46,7 +46,7 @@ Content-Type: application/json
   "prompt": "what is my portfolio?"
 }
 
-### POST
+### POST Ask portfolio with more detail demo
 # @timeout 600
 POST http://localhost:8080/chat
 Content-Type: application/json
@@ -56,7 +56,7 @@ Content-Type: application/json
 }
 
 
-### POST
+### POST Ask tickets demo
 # @timeout 600
 POST http://localhost:8080/chat
 Content-Type: application/json
@@ -65,7 +65,7 @@ Content-Type: application/json
   "prompt": "show my tickets"
 }
 
-### POST
+### POST Ask tickets with details demo
 # @timeout 600
 POST http://localhost:8080/chat
 Content-Type: application/json
@@ -74,7 +74,7 @@ Content-Type: application/json
   "prompt": "show my tickets with related withdrawal"
 }
 
-### POST
+### POST Ask tickets with details demo 2
 # @timeout 600
 POST http://localhost:8080/chat
 Content-Type: application/json
