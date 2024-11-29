@@ -1,64 +1,41 @@
 
 ### POST
 # @timeout 600
-POST http://localhost:8080/chat
+POST http://localhost:8080/chatWithMemory
 Content-Type: application/json
 
 {
-  "prompt": "hi"
-}
-###
-
-### POST
-# @timeout 600
-POST http://localhost:8080/chat
-Content-Type: application/json
-
-{
-  "prompt": "tell me a joke"
-}
-###
-
-
-### POST
-# @timeout 600
-POST http://localhost:8080/chat
-Content-Type: application/json
-
-{
-  "prompt": "predict next week weather in list"
+  "prompt": "price"
 }
 
 ###
 
 ### POST
 # @timeout 600
-POST http://localhost:8080/chat
+POST http://localhost:8080/chatWithMemory
 Content-Type: application/json
 
 {
-  "prompt": "weather?"
+  "prompt": "btc and eth"
 }
 
 ### POST
 # @timeout 600
-POST http://localhost:8080/chat
+POST http://localhost:8080/chatWithMemory
 Content-Type: application/json
 
 {
-  "prompt": "predict next week weather and describe what is a joke"
+  "prompt": "more other coins"
 }
-
 
 ### POST
 # @timeout 600
-POST http://localhost:8080/chat
+POST http://localhost:8080/chatWithMemory
 Content-Type: application/json
 
 {
-  "prompt": "list US president"
+  "prompt": "solana"
 }
-
 
 ### POST
 # @timeout 600
@@ -85,15 +62,23 @@ POST http://localhost:8080/chat
 Content-Type: application/json
 
 {
-  "prompt": "list my ticket"
+  "prompt": "show my tickets"
 }
 
-
-
-### Chat Memory Demo
-GET http://localhost:8080/ai/chatWithMemory
+### POST
+# @timeout 600
+POST http://localhost:8080/chat
 Content-Type: application/json
 
 {
-  "prompt": "hi"
+  "prompt": "show my tickets with related withdrawal"
+}
+
+### POST
+# @timeout 600
+POST http://localhost:8080/chat
+Content-Type: application/json
+
+{
+  "prompt": "show my tickets with related withdrawal and wallet address"
 }

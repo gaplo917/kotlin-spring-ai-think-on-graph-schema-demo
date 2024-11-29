@@ -1,0 +1,8 @@
+```cypher
+// start from user node and search relevant relationships to answer user's question
+MATCH path=(u:User {userId: "USER_ID_PLACEHOLDER"})-[r1::{{relationships1-at-depth1}}|:{{relationships2-at-depth1}}]->(level1)-[r2:{{relationships1-at-depth2}}|{{relationships2-at-depth2}}]->(level2)->...
+// if user's question has specific time range, apply time-related filters to the relationships
+WHERE (level1.timestamp IS NULL OR level1.timestamp >= datetime('2020-01-01T00:00:00'))
+// ALWAYS return full path as output
+RETURN path
+```

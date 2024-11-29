@@ -4,7 +4,7 @@ classDiagram
 class User {
     +String userId
     +String email
-    +String phoneNumber
+    +String phoneNumberas
     +DateTime registrationDate
     +String kycStatus
     +DateTime lastLoginDate

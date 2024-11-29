@@ -22,24 +22,26 @@ class ChatController @Autowired constructor(
     private val generalAssistantAgentService: GeneralAssistantAgentService,
 ) {
 
+    // TODO: it can be captured by session or jwt token.
+    val userId = "USER123"
+
     @PostMapping("/chat")
     fun generate(
         @RequestBody body: ChatBody
     ): String {
         return generalAssistantAgentService.chat(
-            prompt = body.prompt ?: ""
+            userId = userId,
+            prompt = body.prompt ?: TODO("throw bad request")
         )
     }
 
-    @GetMapping("/ai/chatWithMemory")
+    @PostMapping("/chatWithMemory")
     fun chatMemory(
-        @RequestParam(
-            value = "message",
-            defaultValue = ""
-        ) message: String
+        @RequestBody body: ChatBody
     ): String {
         return generalAssistantAgentService.chat(
-            prompt = message,
+            userId = userId,
+            prompt = body.prompt ?: TODO("throw bad request"),
             withMemory = true
         )
     }

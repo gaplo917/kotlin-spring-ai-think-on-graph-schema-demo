@@ -1,5 +1,6 @@
 package com.gaplo917.demo.agents
 
+import com.gaplo917.demo.interfaces.LLMOutputExtraction
 import kotlinx.coroutines.flow.toList
 import org.neo4j.driver.types.Node
 import org.neo4j.driver.types.Relationship
@@ -30,31 +31,20 @@ interface GraphAgentService {
 }
 
 data class KnowledgePath(val entities: List<Entity>, val properties: Set<String>) {
-    private fun Node.toString(properties: Set<String>): String {
+    private fun Node.toLLMContext(properties: Set<String>): String {
         return "${labels().joinToString(",")}(${asMap().filter { properties.contains(it.key) }}"
     }
-    private fun Relationship.toString(properties: Set<String>): String {
+    private fun Relationship.toLLMContext(properties: Set<String>): String {
         return "${type()}(${asMap().filter { properties.contains(it.key) }}"
     }
-    override fun toString(): String {
+    fun toLLMContext(): String {
         return entities.joinToString("->") { entity ->
             when (entity) {
-                is Node -> entity.toString(properties)
-                is Relationship -> entity.toString(properties)
+                is Node -> entity.toLLMContext(properties)
+                is Relationship -> entity.toLLMContext(properties)
                 else -> ""
             }
         }
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if(other is KnowledgePath) {
-            return other.toString() == toString()
-        }
-        return super.equals(other)
-    }
-
-    override fun hashCode(): Int {
-        return entities.hashCode()
     }
 }
 
@@ -62,15 +52,21 @@ data class KnowledgePath(val entities: List<Entity>, val properties: Set<String>
 class GraphAgentServiceImpl @Autowired constructor(
     @Qualifier("graphAgentModel") private val model: ChatModel,
     @Value("classpath:/prompts/graph-agent-user-prompt.st") private val graphAgentPT: Resource,
-    @Value("classpath:/prompts/mermaid_graph_schema.txt") private val graphSchemaResource: Resource,
+    @Value("classpath:/prompts/mermaid-graph-schema.txt") private val graphSchemaResource: Resource,
+    @Value("classpath:/prompts/cypher-query-template.txt") private val cypherQueryTemplateResource: Resource,
     private val graphClient: ReactiveNeo4jClient,
-) : GraphAgentService {
+) : GraphAgentService, LLMOutputExtraction {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val graphSchema by lazy {
         graphSchemaResource.inputStream.readAllBytes().decodeToString()
     }
+
+    private val cypherQueryTemplate by lazy {
+        cypherQueryTemplateResource.inputStream.readAllBytes().decodeToString()
+    }
+
     private val chatClient by lazy {
         ChatClient.builder(model)
             .defaultUser(graphAgentPT)
@@ -84,30 +80,28 @@ class GraphAgentServiceImpl @Autowired constructor(
                     mapOf(
                         "userQuestion" to question,
                         "graphSchema" to graphSchema,
-                        "queryTemplate" to """
-                            ```cypher
-                            MATCH path=(u:User {userId: "USER_ID_PLACEHOLDER"})-[r1::{{relationships-at-depth1}}|:{{relationships-at-depth1}}]->(level1)-[r2:{{relationships-at-depth2}}|{{relationships-at-depth2}}]->(level2)
-                            WHERE (level1.property IS NULL OR level1.timestamp >= datetime('2020-01-01T00:00:00'))
-                            RETURN path
-                            ```
-                        """.trimIndent()
+                        "queryTemplate" to cypherQueryTemplate
                     )
                 )
             }.call()
             .content() ?: ""
 
-        val queryTagRe = """<query>\s*```cypher\s*([\s\S]*?)```\s*</query>""".toRegex()
-        val propertiesTagRe = """<properties>([\s\S]*?)</properties>""".toRegex()
+        logger.info("[DEMO_GRAPH_AGENT_001]agent: {}", content)
 
-        val query = queryTagRe.find(content)?.groupValues?.get(1)?.trim() ?: ""
+        val query = content.extractXmlTagAndMDCodeCypher("query") ?: ""
+
+        // TODO: validate the query using AST and rebuild it using query builder
         val userQuery = query.replace("USER_ID_PLACEHOLDER", userId)
 
-        val propertiesStr = (propertiesTagRe.find(content)?.groupValues?.get(1)?.trim() ?: "")
-        val properties = propertiesStr.split(",").map { it.trim() }.toSet()
+        val properties = content.extractXmlTag("properties")
+            ?.split(",")
+            ?.map { it.trim() }
+            ?.toSet()
+            ?: setOf()
 
-        logger.debug("[GA01]generated user query: {}, properties: {}", userQuery, properties)
+        logger.info("[DEMO_GRAPH_AGENT_002]generated user query: {}, properties: {}", userQuery, properties)
 
-        return graphClient.query(userQuery).mappedBy { system, record ->
+        return graphClient.query(userQuery).mappedBy { _, record ->
             val entities = mutableListOf<Entity>()
             var lastVisitNode: Node? = null
             for (segment in record.get(0).asPath()) {
@@ -123,7 +117,7 @@ class GraphAgentServiceImpl @Autowired constructor(
             .fetchAll()
             .toList()
             .distinct()
-            .also { logger.debug("[GA02]graph data: {}", it) }
+            .also { logger.info("[DEMO_GRAPH_AGENT_003]queried graph data from database: {}", it) }
     }
 
 }
