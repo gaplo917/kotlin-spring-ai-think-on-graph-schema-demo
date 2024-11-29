@@ -32,19 +32,20 @@ class GetCoinPriceToolConfig {
 
     @Bean(value = [GET_COIN_PRICE_LIST])
     fun getCoinPrice(coinPriceService: CoinPriceService): FunctionCallback {
-        return FunctionCallbackWrapper.builder(Function<GetCoinPriceRequest, GetCoinPriceResponse> { req ->
-            runBlocking(Dispatchers.IO) {
-                logger.info("[DEMO_COIN_PRICE] symbols: {}", req.symbols)
-                GetCoinPriceResponse(
-                    coinPriceService.getTickers(req.symbols).map {
-                        GetCoinPriceResponse.CoinPrice(
-                            symbol = it.symbol,
-                            price = it.lastPrice
-                        )
-                    }
-                )
-            }
-        }).withName(GET_COIN_PRICE_LIST)
+        return FunctionCallbackWrapper.builder(
+            Function<GetCoinPriceRequest, GetCoinPriceResponse> { req ->
+                runBlocking(Dispatchers.IO) {
+                    logger.info("[DEMO_COIN_PRICE] symbols: {}", req.symbols)
+                    GetCoinPriceResponse(
+                        coinPriceService.getTickers(req.symbols).map {
+                            GetCoinPriceResponse.CoinPrice(
+                                symbol = it.symbol,
+                                price = it.lastPrice
+                            )
+                        }
+                    )
+                }
+            }).withName(GET_COIN_PRICE_LIST)
             .withDescription("Get coin price list from exchange. Required `symbols` parameters from user. Example symbols are BTCUSDT")
             .withInputType(GetCoinPriceRequest::class.java)
             .build()

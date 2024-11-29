@@ -21,7 +21,8 @@ enum class KnowledgeType {
     companion object {
         private val kts = KnowledgeType.entries.associateBy { it.name }
 
-        val llmDescription get() = """
+        val llmDescription
+            get() = """
              Available knowledgeType=[${KnowledgeType.entries.joinToString(",")}]
         """.trimIndent()
 
@@ -52,28 +53,35 @@ class GetUserDataToolConfig {
         graphAgentService: GraphAgentService,
     ): FunctionCallback {
 
-        return FunctionCallbackWrapper.builder(BiFunction<GetUserDataRequest, ToolContext, GetUserDataResponse> { req, toolContext ->
-            logger.info("[DEMO_USER_DATA_001]knowledgeType:{}, originalQuestion:{}", req.knowledgeType, req.originalQuestion)
-            GetUserDataResponse(
-                knowledge = when (req.knowledgeType) {
-                    KnowledgeType.USER_TICKETS,
-                    KnowledgeType.USER_FINANCIAL_ACTIVITY,
-                    KnowledgeType.USER_PORTFOLIO -> {
-                        runBlocking(Dispatchers.IO) {
-                            val kpList = graphAgentService.thinkOnGraph(
-                                toolContext.context["userId"] as? String ?: "",
-                                req.originalQuestion
-                            )
-                            """Here are your user data in knowledge graph format(node{...}->relationship{...}->node{...}):${
-                                kpList.joinToString("\n") { it.toLLMContext() }
-                            }
+        return FunctionCallbackWrapper.builder(
+            BiFunction<GetUserDataRequest, ToolContext, GetUserDataResponse> { req, toolContext ->
+                logger.info(
+                    "[DEMO_USER_DATA_001]knowledgeType:{}, originalQuestion:{}",
+                    req.knowledgeType,
+                    req.originalQuestion
+                )
+                GetUserDataResponse(
+                    knowledge = when (req.knowledgeType) {
+                        // TODO: demo capability to breakdown into sub-graph
+                        KnowledgeType.USER_TICKETS,
+                        KnowledgeType.USER_FINANCIAL_ACTIVITY,
+                        KnowledgeType.USER_PORTFOLIO -> {
+                            runBlocking(Dispatchers.IO) {
+                                val kpList = graphAgentService.thinkOnGraph(
+                                    toolContext.context["userId"] as? String ?: "",
+                                    req.originalQuestion
+                                )
+                                """Here are your user data in knowledge graph format(node{...}->relationship{...}->node{...}):${
+                                    kpList.joinToString("\n") { it.toLLMContext() }
+                                }
                             """.trimMargin()
+                            }
                         }
+
+                        KnowledgeType.UNKNOWN -> ""
                     }
-                    KnowledgeType.UNKNOWN -> ""
-                }
-            )
-        }).withName(GET_USER_DATA_TOOL)
+                )
+            }).withName(GET_USER_DATA_TOOL)
             .withDescription("""Get user data from database.${KnowledgeType.llmDescription}.""".trimIndent())
             .withInputType(GetUserDataRequest::class.java)
             .build()
