@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class ModelConfiguration {
-    @Bean(name = ["generalAssistantAgentModel"])
-    fun generalAssistantAgent(
+    @Bean(name = ["assistantModel"])
+    fun assistantModel(
         ollamaApi: OllamaApi
     ): ChatModel {
         return OllamaChatModel.builder()

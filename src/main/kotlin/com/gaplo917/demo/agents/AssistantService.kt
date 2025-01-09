@@ -18,24 +18,24 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 
-interface GeneralAssistantAgentService {
+interface AssistantService {
     fun chat(userId: String, prompt: String, withMemory: Boolean = false): String
 }
 
 @Service
-class GeneralAssistantAgentServiceImpl @Autowired constructor(
-    @Qualifier("generalAssistantAgentModel") private val model: ChatModel,
+class AssistantServiceImpl @Autowired constructor(
+    @Qualifier("assistantModel") private val model: ChatModel,
     @Value("classpath:/prompts/assistant-react-prompt.st") private val assistantSReactPTRes: Resource,
     @Value("classpath:/prompts/assistant-system-prompt.st") private val assistantSPTRes: Resource,
     @Value("classpath:/prompts/assistant-user-prompt.st") private val assistantPTRes: Resource,
     @Qualifier(GET_USER_DATA_TOOL) private val getExternalKnowledgeTool: FunctionCallback,
     @Qualifier(GET_COIN_PRICE_LIST) private val getWeatherTool: FunctionCallback
-) : GeneralAssistantAgentService, LLMOutputExtraction {
+) : AssistantService, LLMOutputExtraction {
     private val longLiveMemory = InMemoryChatMemory()
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val tools = listOf(getExternalKnowledgeTool, getWeatherTool)
 
-    private val chatClientWithFunction by lazy {
+    private val supervisorClient by lazy {
         ChatClient.builder(model)
             .defaultUser(assistantPTRes)
             .defaultSystem(assistantSPTRes)
@@ -102,7 +102,7 @@ class GeneralAssistantAgentServiceImpl @Autowired constructor(
             return memory.toConversationHistory(userId, chatHistoryWindowSize)
         } else {
 
-            chatClientWithFunction.prompt()
+            supervisorClient.prompt()
                 .system { it.params(mapOf("prompt" to prompt, "rationale" to rationale, "thinking" to thinking)) }
                 .user { it.params(mapOf("prompt" to prompt)) }
                 .also {

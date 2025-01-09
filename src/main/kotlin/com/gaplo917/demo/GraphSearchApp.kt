@@ -1,6 +1,6 @@
 package com.gaplo917.demo
 
-import com.gaplo917.demo.agents.GeneralAssistantAgentService
+import com.gaplo917.demo.agents.AssistantService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -19,7 +19,7 @@ data class ChatBody(
 
 @RestController
 class ChatController @Autowired constructor(
-    private val generalAssistantAgentService: GeneralAssistantAgentService,
+    private val assistantService: AssistantService,
 ) {
 
     // TODO: it can be captured by session or jwt token.
@@ -29,7 +29,7 @@ class ChatController @Autowired constructor(
     fun generate(
         @RequestBody body: ChatBody
     ): String {
-        return generalAssistantAgentService.chat(
+        return assistantService.chat(
             userId = userId,
             prompt = body.prompt ?: TODO("throw bad request")
         )
@@ -39,7 +39,7 @@ class ChatController @Autowired constructor(
     fun chatMemory(
         @RequestBody body: ChatBody
     ): String {
-        return generalAssistantAgentService.chat(
+        return assistantService.chat(
             userId = userId,
             prompt = body.prompt ?: TODO("throw bad request"),
             withMemory = true

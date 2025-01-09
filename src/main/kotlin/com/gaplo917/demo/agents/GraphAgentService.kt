@@ -1,10 +1,8 @@
 package com.gaplo917.demo.agents
 
+import com.gaplo917.demo.extensions.queryKnowledgePaths
 import com.gaplo917.demo.interfaces.LLMOutputExtraction
-import kotlinx.coroutines.flow.toList
-import org.neo4j.driver.types.Node
-import org.neo4j.driver.types.Relationship
-import org.neo4j.driver.types.Entity
+import com.gaplo917.demo.models.KnowledgePath
 import org.slf4j.LoggerFactory
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.model.ChatModel
@@ -13,8 +11,6 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.data.neo4j.core.ReactiveNeo4jClient
-import org.springframework.data.neo4j.core.fetchAll
-import org.springframework.data.neo4j.core.mappedBy
 import org.springframework.stereotype.Service
 
 interface GraphAgentService {
@@ -28,24 +24,6 @@ interface GraphAgentService {
      */
     suspend fun thinkOnGraph(userId: String, question: String): List<KnowledgePath>
 
-}
-
-data class KnowledgePath(val entities: List<Entity>, val properties: Set<String>) {
-    private fun Node.toLLMContext(properties: Set<String>): String {
-        return "${labels().joinToString(",")}(${asMap().filter { properties.contains(it.key) }}"
-    }
-    private fun Relationship.toLLMContext(properties: Set<String>): String {
-        return "${type()}(${asMap().filter { properties.contains(it.key) }}"
-    }
-    fun toLLMContext(): String {
-        return entities.joinToString("->") { entity ->
-            when (entity) {
-                is Node -> entity.toLLMContext(properties)
-                is Relationship -> entity.toLLMContext(properties)
-                else -> ""
-            }
-        }
-    }
 }
 
 @Service
@@ -90,33 +68,18 @@ class GraphAgentServiceImpl @Autowired constructor(
 
         val query = content.extractXmlTagAndMDCodeCypher("query") ?: ""
 
-        // TODO: validate the query using AST and rebuild it using query builder
-        val userQuery = query.replace("USER_ID_PLACEHOLDER", userId)
+        // TODO: validate the query using AST and rebuild query dynamically using query builder
+        val queryWithUserId = query.replace("USER_ID_PLACEHOLDER", userId)
 
         val properties = content.extractXmlTag("properties")
             ?.split(",")
-            ?.map { it.trim() }
+            ?.mapNotNull { it.split(".").takeLast(1).lastOrNull()?.toString()?.trim() }
             ?.toSet()
             ?: setOf()
 
-        logger.info("[DEMO_GRAPH_AGENT_002]generated user query: {}, properties: {}", userQuery, properties)
+        logger.info("[DEMO_GRAPH_AGENT_002]generated user query: {}, properties: {}", queryWithUserId, properties)
 
-        return graphClient.query(userQuery).mappedBy { _, record ->
-            val entities = mutableListOf<Entity>()
-            var lastVisitNode: Node? = null
-            for (segment in record.get(0).asPath()) {
-                if(lastVisitNode?.elementId() != segment.start().elementId()) {
-                    entities.add(segment.start())
-                }
-                entities.add(segment.relationship())
-                entities.add(segment.end())
-                lastVisitNode = segment.end()
-            }
-            KnowledgePath(entities, properties)
-        }
-            .fetchAll()
-            .toList()
-            .distinct()
+        return graphClient.queryKnowledgePaths(queryWithUserId, selectors = properties)
             .also { logger.info("[DEMO_GRAPH_AGENT_003]queried graph data from database: {}", it) }
     }
 

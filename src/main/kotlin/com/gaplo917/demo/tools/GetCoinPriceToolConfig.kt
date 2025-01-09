@@ -46,7 +46,7 @@ class GetCoinPriceToolConfig {
                     )
                 }
             }).withName(GET_COIN_PRICE_LIST)
-            .withDescription("Get coin price list from exchange. Required `symbols` parameters from user. Example symbols are BTCUSDT")
+            .withDescription("Get coin price list from exchange. Required `symbols` parameters from user. Example: Bitcoin equivalent symbol is BTCUSDT.")
             .withInputType(GetCoinPriceRequest::class.java)
             .build()
     }

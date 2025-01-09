@@ -1,1 +1,1 @@
-rootProject.name = "kotlin-spring-ai-graph-search"
+rootProject.name = "agentic-demo-kotlin-spring-ai"

@@ -23,7 +23,7 @@ enum class KnowledgeType {
 
         val llmDescription
             get() = """
-             Available knowledgeType=[${KnowledgeType.entries.joinToString(",")}]
+             Available knowledgeType=${KnowledgeType.entries.joinToString(",")}
         """.trimIndent()
 
         @JvmStatic
@@ -74,7 +74,11 @@ class GetUserDataToolConfig {
                                 """Here are your user data in knowledge graph format(node{...}->relationship{...}->node{...}):${
                                     kpList.joinToString("\n") { it.toLLMContext() }
                                 }
-                            """.trimMargin()
+                            """.trimMargin().also {
+                                    logger.info(
+                                        "[DEMO_USER_DATA_002]tool resp: {}", it
+                                    )
+                                }
                             }
                         }
 

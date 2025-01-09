@@ -23,7 +23,7 @@ Use the <properties-template> to create a list of property that is useful to ans
 - ALWAYS ignore `id` field that designed for machine processing
 
 
-Think step by step carefully of which relationships and properties are needed on different depths with the follow format:
+Think step by step carefully of which relationships and properties are needed on ALL depths with the follow format:
 
 user question: the question you are going to solve
 
@@ -38,7 +38,7 @@ Your output query
 </query>
 
 <properties>
-Your output properties, directly output without preamble
+all properties are related to user question, comma separated, directly output without preamble
 </properties>
 
 ---
